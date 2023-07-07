@@ -1,15 +1,11 @@
 #ifndef SDLOGGER_H
 #define SDLOGGER_H
 
-#include <SD.h>
-#include "../../include/SDCard.hpp"
-
 #include <vector>
+#include <SD.h>
 
-#define TT_CLK 18
-#define TT_MISO 19
-#define TT_MOSI 23
-#define TT_SS 13
+#include "../../include/SDCard.hpp"
+#include "../../include/pinout.hpp"
 
 
 /*

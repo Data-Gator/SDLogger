@@ -1,22 +1,26 @@
+#ifndef SDREADER_HPP
+#define SDREADER_HPP
+
 #include <SD.h>
 #include <vector>
 #include <string>
 
+#include <WiFiClientSecure.h>
+#include <PubSubClient.h>
+
 #include "../../include/SDCard.hpp"
-#include "SDLogger.hpp"
+#include "../../include/pinout.hpp"
+
 #include "TimeStamp.hpp"
-#include "MQTTMailer.hpp"
-
-#ifndef SDREADER_HPP
-#define SDREADER_HPP
-
+#include <ArdentSerial.hpp>
+#include <ArdentMQTT.hpp>
 
 using namespace std;
 
 // must have an mqtt_client connected to publish data
 //  to
 extern PubSubClient mqtt_client;
-extern const bool USB_DEBUG;
+extern bool USB_DEBUG;
 
 /**
  * SDReader provides an interface for opening and
@@ -45,6 +49,9 @@ class SDReader {
                 vector<string> &data);
 
         int calculate_page_size(vector<string> &page);
+
+        ArdentSerial ard_ser;
+        ArdentMQTT* ard_mqtt = new ArdentMQTT(mqtt_client);
 
     public:
 
