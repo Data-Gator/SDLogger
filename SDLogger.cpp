@@ -21,7 +21,7 @@ SDLogger::SDLogger(std::string prefix, int month, int day, int year, std::string
 
 bool SDLogger::initialize_sd_card(){
 
-    const auto ok = this->sd.begin(SCK, MISO, MOSI, CS, &SPI);
+    const auto ok = this->sd.begin(TT_CLK, TT_MISO, TT_MOSI, TT_SS, &SPI);
 
     if(!ok){
         Serial.println("[ERROR] failed to initialize sd card");

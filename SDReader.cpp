@@ -3,12 +3,12 @@
 // debug helper function not scoped to SDReader class
 // prints the current amount of free memory on the heap
 void print_heap_debug(){
-    
-    double perc = ESP.getFreeHeap();
-    string msg = "memory usage is " + to_string(perc) + " bytes";
-
-    //log_with_flags(DebugLevel::debug, msg);
-
+    if(USB_DEBUG){
+        Serial.print("[DEBUG] memory usage is ");
+        double perc = ESP.getFreeHeap();
+        Serial.print(perc);
+        Serial.println(" bytes");
+    }
 }
 
 /*
@@ -68,13 +68,18 @@ int SDReader::calculate_page_size(vector<string> &page){
         size += n.size();
 
     if(USB_DEBUG){
-        string msg = "memory usage is " + to_string(ESP.getFreeHeap()) + " bytes\n\t";
-        msg += "page size is " + to_string(size) + "bytes, and capacity is " + to_string(page.capacity()) + " bytes";
-        ard_ser.send_debug(DebugLevel::warning, msg);
+        Serial.print("[DEBUG] memory usage is ");
+        double perc = ESP.getFreeHeap();
+        Serial.print(perc);
+        Serial.println(" bytes");
+        Serial.print("[DEBUG] page size is ");
+        Serial.print(size);
+        Serial.print(" bytes, and capacity is ");
+        Serial.println(page.capacity());
     }
 
     if(USB_DEBUG && size > 34464){
-        ard_ser.send_debug(DebugLevel::warning, "page size is above MQTT buffer limit of 34464");
+        Serial.println("[WARNING] page size is above MQTT buffer limit of 34464");
     }
 
     return size;
@@ -85,7 +90,7 @@ int SDReader::calculate_page_size(vector<string> &page){
  */
 bool SDReader::initialize_sd_card(){
 
-    const auto ok = this->sd.begin(SCK, MISO, MOSI, CS, &SPI);
+    const auto ok = this->sd.begin(TT_CLK, TT_MISO, TT_MOSI, TT_SS, &SPI);
 
     if(!ok){
         Serial.println("[ERROR] failed to initialize sd card");
@@ -179,6 +184,7 @@ void SDReader::read_entry_range(
 
     // clear log buffer
     vector<string> data = {};
+    MQTTMailer mqtt_inst = MQTTMailer::getInstance();
 
     while(this->fp.available() ){
         //Serial.println("\tmemory usage at top of loop");
@@ -212,7 +218,7 @@ void SDReader::read_entry_range(
             TimeStamp terminus(data.back().substr(0, data.back().find(this->separator)));
             string json_page = this->build_json_page(this->filename, epoch.get_epoch(), terminus.get_epoch(), data);
 
-            this->ard_mqtt->send_data(string("datagator/data/time_range/") + WiFi.macAddress().c_str(), json_page);
+            mqtt_inst.mailMessage(&mqtt_client, string("datagator/data/time_range/") + WiFi.macAddress().c_str(), json_page, false);
 
             // clear log buffer
             //this->calculate_page_size(data);
