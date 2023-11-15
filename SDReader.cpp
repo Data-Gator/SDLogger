@@ -149,8 +149,6 @@ void SDReader::read_entry_range_from_files(TimeStamp epoch,
         this->filename = test_fn;
 
         if(this->sd.exists(test_fn.c_str())){
-            Serial.println("reading from file");
-            Serial.println(test_fn.c_str());
             // open and pull data from file
             this->open_file(test_fn);
             //print_heap_debug();
@@ -158,7 +156,7 @@ void SDReader::read_entry_range_from_files(TimeStamp epoch,
             this->close_file();
 
         }else{
-            Serial.println("\tfile doesn't exist");
+            //Serial.println("\tfile doesn't exist");
         }
     }
 
@@ -214,9 +212,7 @@ void SDReader::read_entry_range(
             TimeStamp terminus(data.back().substr(0, data.back().find(this->separator)));
             string json_page = this->build_json_page(this->filename, epoch.get_epoch(), terminus.get_epoch(), data);
 
-            //this->ard_mqtt->send_data(string("datagator/data/time_range/") + WiFi.macAddress().c_str(), json_page);
-            this->ard_mqtt->send_debug(DebugLevel::debug, json_page);
-            Serial.println("sent a page of data");
+            this->ard_mqtt->send_data(string("datagator/data/time_range/") + WiFi.macAddress().c_str(), json_page);
 
             // clear log buffer
             //this->calculate_page_size(data);
